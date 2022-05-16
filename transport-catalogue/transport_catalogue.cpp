@@ -6,7 +6,34 @@ namespace transport_catalogue
 
 	namespace catalogue
 	{
-		class reader::Reader;
+
+		TransportCatalogue::Stop::Stop(std::string name_, geo::Coordinates coor_)
+			: name(name_)
+		{
+			coordinates.lat = coor_.lat;
+			coordinates.lng = coor_.lng;
+		}
+
+		TransportCatalogue::Stop::Stop(Stop&& other) noexcept
+		{
+			name = std::move(other.name);
+			coordinates.lat = other.coordinates.lat;
+			coordinates.lng = other.coordinates.lng;
+		}
+
+		TransportCatalogue::Bus::Bus(Bus&& other) noexcept
+		{
+			bus_name = std::move(other.bus_name);
+			stops = std::move(other.stops);
+		}
+
+		size_t TransportCatalogue::StopPairHasher::operator()(const std::pair<const Stop*, const Stop*> stop_pair) const
+		{
+			const size_t a = *reinterpret_cast<const size_t*>(&stop_pair.first);
+			const size_t b = *reinterpret_cast<const size_t*>(&stop_pair.second);
+			return a * 17 + b;
+		}
+
 		TransportCatalogue::TransportCatalogue(reader::Reader& reader)
 		{
 			for (reader::StopQuery& stop : reader.stop_queries_)
@@ -56,28 +83,27 @@ namespace transport_catalogue
 			Bus bus;
 			bus.bus_name = bus_query.bus_name;
 			buses_.push_back(std::move(bus));
+			std::unordered_set<std::string> uniq_stops;
 			for (const auto& name : bus_query.stops)
 			{
 				buses_.back().stops.push_back(stopname_to_stop_.at(name));
 				stops_to_buses_[stopname_to_stop_.at(name)].insert(&buses_.back());
+				uniq_stops.insert(name);
 			}
+			buses_.back().number_of_uniq_stops = uniq_stops.size();
 			busname_to_bus_.emplace(std::make_pair(std::string_view(buses_.back().bus_name), &buses_.back()));
 		}
 
-		void TransportCatalogue::GetBusInfo(std::string_view bus_name)
+		BusInfo TransportCatalogue::GetBusInfo(std::string_view bus_name) const
 		{
+			BusInfo bus_info;
+			bus_info.name = bus_name;
 			if (busname_to_bus_.count(bus_name) == 0)
 			{
-				std::cout << "Bus " << bus_name << ": not found" << std::endl;
-				return;
+				return bus_info;
 			}
-			const Bus& bus = *busname_to_bus_[bus_name];
-			std::unordered_set<Stop*> uniq_stops;
-			for (Stop* stop : bus.stops)
-			{
-				uniq_stops.insert(stop);
-			}
-			size_t unique_stops_count = uniq_stops.size();
+			bus_info.is_found = true;
+			const Bus& bus = *busname_to_bus_.at(bus_name);
 			geo::Coordinates from = bus.stops[0]->coordinates;
 			geo::Coordinates to;
 			double geo_distance = 0;
@@ -105,50 +131,32 @@ namespace transport_catalogue
 				stop_from = stop_to;
 			}
 			double curvature = actual_distance / geo_distance;
-			std::cout << "Bus " << bus_name << ": " << bus.stops.size() << " stops on route, " << unique_stops_count
-				<< " unique stops, " << std::setprecision(6) << actual_distance
-				<< " route length, " << curvature << " curvature" << std::endl;
+			bus_info.actual_distance = actual_distance;
+			bus_info.curvature = curvature;
+			bus_info.number_of_stops = bus.stops.size();
+			bus_info.number_of_uniq_stops = bus.number_of_uniq_stops;
+			return bus_info;
 		}
 
-		void TransportCatalogue::GetStopInfo(std::string_view stop_name)
+		StopInfo TransportCatalogue::GetStopInfo(std::string_view stop_name) const
 		{
 			if (stopname_to_stop_.count(stop_name) == 0)
 			{
-				std::cout << "Stop " << stop_name << ": not found" << std::endl;
-				return;
+				return { stop_name, false, {} };
+
 			}
 			if (stops_to_buses_.count(stopname_to_stop_.at(stop_name)) == 0)
 			{
-				std::cout << "Stop " << stop_name << ": no buses" << std::endl;
-				return;
+				return { stop_name, true, {} };
 			}
-			std::cout << "Stop " << stop_name << ": buses";
-			std::set<std::string_view> bus_names;
+
+			StopInfo stop{ stop_name, true, {} };
 			for (Bus* bus : stops_to_buses_.at(stopname_to_stop_.at(stop_name)))
 			{
-				bus_names.insert(bus->bus_name);
-				//std::cout << ' ' << bus->bus_name;
+				stop.buses.insert(bus->bus_name);
 			}
-			for (std::string_view name : bus_names)
-			{
-				std::cout << ' ' << name;
-			}
-			std::cout << std::endl;
-		}
+			return stop;
 
-		void TransportCatalogue::ProcessInfoQueries(const reader::Reader& reader)
-		{
-			for (const auto& query : reader.info_queries_)
-			{
-				if (query.is_stop)
-				{
-					GetStopInfo(query.name);
-				}
-				else
-				{
-					GetBusInfo(query.name);
-				}
-			}
 		}
 
 	}

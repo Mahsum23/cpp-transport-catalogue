@@ -17,9 +17,25 @@
 namespace transport_catalogue
 {
 
+	struct BusInfo
+	{
+		std::string_view name;
+		bool is_found = false;
+		double actual_distance = 0;
+		double curvature = 0;
+		size_t number_of_stops = 0;
+		size_t number_of_uniq_stops = 0;
+	};
+
+	struct StopInfo
+	{
+		std::string_view name;
+		bool is_found = false;
+		std::set<std::string> buses;
+	};
+
 	namespace catalogue
 	{
-		class reader::Reader;
 
 		class TransportCatalogue
 		{
@@ -29,38 +45,23 @@ namespace transport_catalogue
 
 			void AddStop(reader::StopQuery&& stop);
 			void AddBus(reader::BusQuery&& bus);
-			void GetBusInfo(std::string_view bus_name);
-			void GetStopInfo(std::string_view stop_name);
-			void ProcessInfoQueries(const reader::Reader& reader);
+			BusInfo GetBusInfo(std::string_view bus_name) const;
+			StopInfo GetStopInfo(std::string_view stop_name) const;
 
 		private:
 			struct Stop
 			{
 				Stop() = default;
-				Stop(std::string name_, geo::Coordinates coor_)
-					: name(name_)
-				{
-					coordinates.lat = coor_.lat;
-					coordinates.lng = coor_.lng;
-				}
-				Stop(Stop&& other) noexcept
-				{
-					name = std::move(other.name);
-					coordinates.lat = other.coordinates.lat;
-					coordinates.lng = other.coordinates.lng;
-				}
+				Stop(std::string name_, geo::Coordinates coor_);
+				Stop(Stop&& other) noexcept;
+
 				std::string name;
 				geo::Coordinates coordinates;
 			};
 
 			struct StopPairHasher
 			{
-				size_t operator()(const std::pair<const Stop*, const Stop*> stop_pair) const
-				{
-					const size_t a = *reinterpret_cast<const size_t*>(&stop_pair.first);
-					const size_t b = *reinterpret_cast<const size_t*>(&stop_pair.second);
-					return a * 17 + b;
-				}
+				size_t operator()(const std::pair<const Stop*, const Stop*> stop_pair) const;
 
 			private:
 				std::hash<const void*> hasher_;
@@ -71,13 +72,11 @@ namespace transport_catalogue
 			struct Bus
 			{
 				Bus() = default;
-				Bus(Bus&& other) noexcept
-				{
-					bus_name = std::move(other.bus_name);
-					stops = std::move(other.stops);
-				}
+				Bus(Bus&& other) noexcept;
+
 				std::string bus_name;
 				std::vector<Stop*> stops;
+				size_t number_of_uniq_stops = 0;
 			};
 
 			std::unordered_set<std::string> stop_names_;
@@ -92,4 +91,3 @@ namespace transport_catalogue
 	}
 
 }
-

@@ -44,13 +44,8 @@ namespace transport_catalogue
 		struct StopQuery
 		{
 			StopQuery() = default;
-			StopQuery(StopQuery&& other) noexcept
-			{
-				stop_name = std::move(other.stop_name);
-				stop_to_distance = std::move(other.stop_to_distance);
-				coordinates.lat = other.coordinates.lat;
-				coordinates.lng = other.coordinates.lng;
-			}
+			StopQuery(StopQuery&& other) noexcept;
+
 			std::unordered_map<std::string, double> stop_to_distance;
 			std::string stop_name = "";
 			geo::Coordinates coordinates;
@@ -59,22 +54,16 @@ namespace transport_catalogue
 		struct BusQuery
 		{
 			BusQuery() = default;
-			BusQuery(BusQuery&& other) noexcept
-			{
-				bus_name = std::move(other.bus_name);
-				stops = std::move(other.stops);
-			}
+			BusQuery(BusQuery&& other) noexcept;
+
 			std::string bus_name;
 			std::vector<std::string> stops;
 		};
 
 		struct InfoQuery
 		{
-			InfoQuery(std::string&& name_, bool is_stop_)
-				: name(name_), is_stop(is_stop_)
-			{
+			InfoQuery(std::string&& name_, bool is_stop_);
 
-			}
 			std::string name;
 			bool is_stop;
 		};
@@ -87,18 +76,23 @@ namespace transport_catalogue
 		public:
 			void ReadQuery(std::istream& in);
 
-			void PrintStopQueries();
+			void PrintStopQueries(std::ostream& out);
 
-			void PrintBusQueries();
+			void PrintBusQueries(std::ostream& out);
 
+			std::vector<InfoQuery> info_queries_;
 		private:
 			friend class catalogue::TransportCatalogue;
 
 			std::pair<std::string, double> ParseDistToStop(const std::string& query);
-
+			StopQuery ParseStopAddQuery(const std::string& s);
+			BusQuery ParseBusAddChainQuery(const std::string& s);
+			BusQuery ParseBusAddCycleQuery(const std::string& s);
+			InfoQuery ParseBusInfoQuery(const std::string& s);
+			InfoQuery ParseStopInfoQuery(const std::string& s);
 			std::vector<StopQuery> stop_queries_;
 			std::vector<BusQuery> bus_queries_;
-			std::vector<InfoQuery> info_queries_;
+			
 		};
 
 	}

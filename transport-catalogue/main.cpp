@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include "input_reader.h"
+#include "stat_reader.h"
 #include "transport_catalogue.h"
 
 using namespace std;
@@ -14,6 +15,7 @@ int main()
 {
 	using namespace transport_catalogue::catalogue;
 	using namespace transport_catalogue::reader;
+	using namespace transport_catalogue::stat_reader;
 	std::ofstream out("out.txt");
 	std::streambuf* coutbuf = std::cout.rdbuf();
 	std::cout.rdbuf(out.rdbuf()); 
@@ -40,7 +42,7 @@ int main()
 	{
 		reader.ReadQuery(inFile);
 	}
-	tc.ProcessInfoQueries(reader);
+	ProcessInfoQueries(tc, reader);
 	inFile.close();
 	ifstream output;
 	output.open("out.txt");
