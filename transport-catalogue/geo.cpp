@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "geo.h"
 
 namespace transport_catalogue

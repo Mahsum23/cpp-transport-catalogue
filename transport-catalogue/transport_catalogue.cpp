@@ -25,28 +25,36 @@ namespace transport_catalogue
 		{
 			bus_name = std::move(other.bus_name);
 			stops = std::move(other.stops);
+			is_roundtrip = other.is_roundtrip;
 		}
+
+		//size_t TransportCatalogue::StopPairHasher::operator()(const std::pair<const Stop*, const Stop*> stop_pair) const
+		//{
+		//	const size_t a = *reinterpret_cast<const size_t*>(&stop_pair.first);
+		//	const size_t b = *reinterpret_cast<const size_t*>(&stop_pair.second);
+		//	return a * 17 + b;
+		//}
 
 		size_t TransportCatalogue::StopPairHasher::operator()(const std::pair<const Stop*, const Stop*> stop_pair) const
 		{
-			const size_t a = *reinterpret_cast<const size_t*>(&stop_pair.first);
-			const size_t b = *reinterpret_cast<const size_t*>(&stop_pair.second);
-			return a * 17 + b;
+			return std::hash<const void*>{}(stop_pair.first)* (37) + std::hash<const void*>{}(stop_pair.second);
 		}
 
-		TransportCatalogue::TransportCatalogue(reader::Reader& reader)
+		
+
+		TransportCatalogue::TransportCatalogue(reader::JsonReader* reader)
 		{
-			for (reader::StopQuery& stop : reader.stop_queries_)
+			for (StopQuery& stop : reader->stop_queries_)
 			{
 				AddStop(std::move(stop));
 			}
-			for (reader::BusQuery& bus : reader.bus_queries_)
+			for (BusQuery& bus : reader->bus_queries_)
 			{
 				AddBus(std::move(bus));
 			}
 		}
 
-		void TransportCatalogue::AddStop(reader::StopQuery&& stop_query)
+		void TransportCatalogue::AddStop(StopQuery&& stop_query)
 		{
 
 			if (stopname_to_stop_.count(stop_query.stop_name) != 0)
@@ -78,10 +86,11 @@ namespace transport_catalogue
 			}
 		}
 
-		void TransportCatalogue::AddBus(reader::BusQuery&& bus_query)
+		void TransportCatalogue::AddBus(BusQuery&& bus_query)
 		{
 			Bus bus;
 			bus.bus_name = bus_query.bus_name;
+			bus.is_roundtrip = bus_query.is_roundtrip;
 			buses_.push_back(std::move(bus));
 			std::unordered_set<std::string> uniq_stops;
 			for (const auto& name : bus_query.stops)
@@ -133,8 +142,8 @@ namespace transport_catalogue
 			double curvature = actual_distance / geo_distance;
 			bus_info.actual_distance = actual_distance;
 			bus_info.curvature = curvature;
-			bus_info.number_of_stops = bus.stops.size();
-			bus_info.number_of_uniq_stops = bus.number_of_uniq_stops;
+			bus_info.number_of_stops = static_cast<int>(bus.stops.size());
+			bus_info.number_of_uniq_stops = static_cast<int>(bus.number_of_uniq_stops);
 			return bus_info;
 		}
 
@@ -157,6 +166,37 @@ namespace transport_catalogue
 			}
 			return stop;
 
+		}
+
+		json::Node TransportCatalogue::BusInfoAsJson(const BusInfo& bus_info, int id) const
+		{
+			using namespace json;
+			if (!bus_info.is_found)
+			{
+				Node node = Dict{ {"request_id", id}, {"error_message", std::string("not found")} };
+				return node;
+			}
+			Node node = Dict{ {"curvature", bus_info.curvature}, {"request_id", id}, {"route_length", bus_info.actual_distance},
+							  {"stop_count", bus_info.number_of_stops}, {"unique_stop_count", bus_info.number_of_uniq_stops} };
+			return node;
+		}
+
+		json::Node TransportCatalogue::StopInfoAsJson(const StopInfo& stop_info, int id) const
+		{
+			using namespace json;
+			if (!stop_info.is_found)
+			{
+				Node node = Dict{ {"request_id", id}, {"error_message", std::string("not found")} };
+				return node;
+			}
+			Array buses;
+			buses.reserve(stop_info.buses.size());
+			for (auto bus : stop_info.buses)
+			{
+				buses.push_back(std::move(bus));
+			}
+			Node node = Dict{ {"buses", buses}, {"request_id", id} };
+			return node;
 		}
 
 	}

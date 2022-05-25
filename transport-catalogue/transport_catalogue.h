@@ -12,43 +12,33 @@
 #include <cassert>
 
 #include "geo.h"
-#include "input_reader.h"
+#include "json_reader.h"
+#include "domain.h"
 
 namespace transport_catalogue
 {
-
-	struct BusInfo
+	namespace catalogue
 	{
-		std::string_view name;
-		bool is_found = false;
-		double actual_distance = 0;
-		double curvature = 0;
-		size_t number_of_stops = 0;
-		size_t number_of_uniq_stops = 0;
-	};
+		class TransportCatalogue;
+	}
+	struct BusView;
+	struct BusViewComp;
+	struct StopView;
 
-	struct StopInfo
-	{
-		std::string_view name;
-		bool is_found = false;
-		std::set<std::string> buses;
-	};
+	std::set<BusView, BusViewComp> GetBusesRenderInfo(const catalogue::TransportCatalogue& catalogue);
+	std::vector<StopView> GetUniqueStopsInBus(const catalogue::TransportCatalogue& catalogue);
 
 	namespace catalogue
 	{
 
 		class TransportCatalogue
 		{
-
+			friend std::vector<transport_catalogue::StopView> transport_catalogue::GetUniqueStopsInBus(const TransportCatalogue& catalogue);
+			friend std::set<transport_catalogue::BusView, transport_catalogue::BusViewComp> transport_catalogue::GetBusesRenderInfo(const TransportCatalogue& catalogue);
+			
+			
 		public:
-			TransportCatalogue(reader::Reader& reader);
-
-			void AddStop(reader::StopQuery&& stop);
-			void AddBus(reader::BusQuery&& bus);
-			BusInfo GetBusInfo(std::string_view bus_name) const;
-			StopInfo GetStopInfo(std::string_view stop_name) const;
-
-		private:
+			
 			struct Stop
 			{
 				Stop() = default;
@@ -56,18 +46,8 @@ namespace transport_catalogue
 				Stop(Stop&& other) noexcept;
 
 				std::string name;
-				geo::Coordinates coordinates;
+				geo::Coordinates coordinates{ 0,0 };
 			};
-
-			struct StopPairHasher
-			{
-				size_t operator()(const std::pair<const Stop*, const Stop*> stop_pair) const;
-
-			private:
-				std::hash<const void*> hasher_;
-			};
-
-
 
 			struct Bus
 			{
@@ -76,7 +56,27 @@ namespace transport_catalogue
 
 				std::string bus_name;
 				std::vector<Stop*> stops;
+				bool is_roundtrip = true;
 				size_t number_of_uniq_stops = 0;
+			};
+
+			TransportCatalogue(reader::JsonReader* reader);
+
+			void AddStop(StopQuery&& stop);
+			void AddBus(BusQuery&& bus);
+			BusInfo GetBusInfo(std::string_view bus_name) const;
+			StopInfo GetStopInfo(std::string_view stop_name) const;
+			json::Node StopInfoAsJson(const StopInfo& stop_info, int id) const;
+			json::Node BusInfoAsJson(const BusInfo& bus_info, int id) const;
+			
+		private:
+
+			struct StopPairHasher
+			{
+				size_t operator()(const std::pair<const Stop*, const Stop*> stop_pair) const;
+
+			private:
+				std::hash<const void*> hasher_;
 			};
 
 			std::unordered_set<std::string> stop_names_;
