@@ -11,8 +11,6 @@ namespace transport_catalogue
 	{
 		class TransportCatalogue;
 	}
-	std::set<BusView, BusViewComp> GetBusesRenderInfo(const catalogue::TransportCatalogue& catalogue);
-	std::vector<StopView> GetUniqueStopsInBus(const catalogue::TransportCatalogue& catalogue);
 
 	namespace renderer
 	{

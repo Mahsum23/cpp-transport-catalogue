@@ -8,9 +8,11 @@ std::ostream& operator<<(std::ostream& out, const json::Node& node)
     return out;
 }
 
-namespace json {
+namespace json 
+{
 
-    namespace {
+    namespace 
+    {
 
         Node LoadNode(istream& input);
 
@@ -361,7 +363,8 @@ namespace json {
         return holds_alternative<Dict>(value_);
     }
 
-    const Array& Node::AsArray() const {
+    const Array& Node::AsArray() const 
+    {
         if (!IsArray())
         {
             throw std::logic_error("not array");
@@ -369,7 +372,8 @@ namespace json {
         return get<Array>(value_);
     }
 
-    double Node::AsDouble() const {
+    double Node::AsDouble() const 
+    {
         if (!IsDouble())
         {
             throw std::logic_error("not double");  
@@ -381,7 +385,8 @@ namespace json {
         return get<double>(value_);
     }
 
-    const Dict& Node::AsMap() const {
+    const Dict& Node::AsMap() const 
+    {
         if (!IsMap())
         {
             throw std::logic_error("not map");
@@ -389,7 +394,8 @@ namespace json {
         return get<Dict>(value_);
     }
 
-    int Node::AsInt() const {
+    int Node::AsInt() const 
+    {
         if (!IsInt())
         {
             throw std::logic_error("not int");
@@ -397,7 +403,8 @@ namespace json {
         return get<int>(value_);
     }
 
-    bool Node::AsBool() const {
+    bool Node::AsBool() const 
+    {
         if (!IsBool())
         {
             throw std::logic_error("not bool");
@@ -405,7 +412,8 @@ namespace json {
         return get<bool>(value_);
     }
 
-    const string& Node::AsString() const {
+    const string& Node::AsString() const 
+    {
         if (!IsString())
         {
             throw std::logic_error("not string");
@@ -502,7 +510,8 @@ namespace json {
         return root_;
     }
 
-    Document Load(istream& input) {
+    Document Load(istream& input) 
+    {
         return Document{ LoadNode(input) };
     }
     

@@ -17,6 +17,7 @@
 
 namespace transport_catalogue
 {
+	class RequestHandler;
 	namespace catalogue
 	{
 		class TransportCatalogue;
@@ -25,17 +26,12 @@ namespace transport_catalogue
 	struct BusViewComp;
 	struct StopView;
 
-	std::set<BusView, BusViewComp> GetBusesRenderInfo(const catalogue::TransportCatalogue& catalogue);
-	std::vector<StopView> GetUniqueStopsInBus(const catalogue::TransportCatalogue& catalogue);
-
 	namespace catalogue
 	{
 
 		class TransportCatalogue
 		{
-			friend std::vector<transport_catalogue::StopView> transport_catalogue::GetUniqueStopsInBus(const TransportCatalogue& catalogue);
-			friend std::set<transport_catalogue::BusView, transport_catalogue::BusViewComp> transport_catalogue::GetBusesRenderInfo(const TransportCatalogue& catalogue);
-			
+			friend class transport_catalogue::RequestHandler;
 			
 		public:
 			
@@ -68,6 +64,8 @@ namespace transport_catalogue
 			StopInfo GetStopInfo(std::string_view stop_name) const;
 			json::Node StopInfoAsJson(const StopInfo& stop_info, int id) const;
 			json::Node BusInfoAsJson(const BusInfo& bus_info, int id) const;
+			std::set<BusView, BusViewComp> GetBusesRenderInfo() const;
+			std::vector<StopView> GetUniqueStopsInBus() const;
 			
 		private:
 

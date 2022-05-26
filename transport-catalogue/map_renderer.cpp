@@ -1,7 +1,7 @@
 #include <unordered_set>
 
 #include "map_renderer.h"
-
+#include "transport_catalogue.h"
 
 namespace transport_catalogue
 {
@@ -159,11 +159,11 @@ namespace transport_catalogue
 
 		void MapRenderer::RenderMap(const catalogue::TransportCatalogue& tc, std::ostream& out) const
 		{
-			std::set<BusView, BusViewComp> bus_renders = GetBusesRenderInfo(tc);
+			std::set<BusView, BusViewComp> bus_renders = tc.GetBusesRenderInfo();
 			std::vector<geo::Coordinates> coordinates;
 			svg::Document doc;
 			
-			std::vector<StopView> uniq_stops_in_bus = GetUniqueStopsInBus(tc);
+			std::vector<StopView> uniq_stops_in_bus = tc.GetUniqueStopsInBus();
 			coordinates.reserve(uniq_stops_in_bus.size());
 			std::transform(uniq_stops_in_bus.begin(), uniq_stops_in_bus.end(), std::back_inserter(coordinates),
 				[](const auto& stop) { return stop.coor_; });

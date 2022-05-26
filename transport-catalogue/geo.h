@@ -6,7 +6,8 @@ namespace transport_catalogue
     namespace geo
     {
 
-        struct Coordinates {
+        struct Coordinates 
+        {
             double lat;
             double lng;
             bool operator==(const Coordinates& other) const;

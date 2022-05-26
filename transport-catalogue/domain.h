@@ -15,12 +15,12 @@
 namespace transport_catalogue
 {
 
-    enum class QueryType
-    {
-        MAP,
-        BUS,
-        STOP
-    };
+	enum class QueryType
+	{
+		MAP,
+		BUS,
+		STOP
+	};
 
 	struct StopQuery
 	{
@@ -39,7 +39,7 @@ namespace transport_catalogue
 
 		std::string bus_name;
 		std::vector<std::string> stops;
-        bool is_roundtrip = true;
+		bool is_roundtrip = true;
 	};
 
 	struct InfoQuery
@@ -47,10 +47,11 @@ namespace transport_catalogue
 		InfoQuery() = default;
 		InfoQuery(int id, std::string&& name, QueryType query_type);
 
-        int id_ = 0;
+		int id_ = 0;
 		std::string name_;
-        QueryType query_type_;
+		QueryType query_type_;
 	};
+
 	struct BusInfo
 	{
 		int id = 0;
@@ -69,87 +70,88 @@ namespace transport_catalogue
 		std::set<std::string> buses;
 	};
 
-    struct StopView
-    {
-        StopView(std::string_view stop_name, geo::Coordinates coor)
-            : name_(stop_name), coor_(coor)
-        {
+	struct StopView
+	{
+		StopView(std::string_view stop_name, geo::Coordinates coor);
+		std::string_view name_;
+		geo::Coordinates coor_{ 0,0 };
+	};
 
-        }
-        std::string_view name_;
-        geo::Coordinates coor_{ 0,0 };
-    };
+	struct BusView
+	{
+		std::string_view name_;
+		std::vector<StopView> stops_;
+		bool is_roundtrip = true;
+	};
 
-    struct BusView
-    {
-        std::string_view name_;
-        std::vector<StopView> stops_;
-        bool is_roundtrip = true;
-    };
+	struct BusViewComp
+	{
+		bool operator()(const BusView& lhs, const BusView& rhs) const;
+	};
 
-    struct BusViewComp
-    {
-        bool operator()(const BusView& lhs, const BusView& rhs) const
-        {
-            return lhs.name_ < rhs.name_;
-        }
-    };
+	inline const double EPSILON = 1e-6;
+	inline bool IsZero(double value) 
+	{
+		return std::abs(value) < EPSILON;
+	}
 
-    inline const double EPSILON = 1e-6;
-    inline bool IsZero(double value) {
-        return std::abs(value) < EPSILON;
-    }
+	class SphereProjector 
+	{
+	public:
+		template <typename PointInputIt>
+		SphereProjector(PointInputIt points_begin, PointInputIt points_end,
+			double max_width, double max_height, double padding)
+			: padding_(padding)
+		{
+			if (points_begin == points_end)
+			{
+				return;
+			}
 
-    class SphereProjector {
-    public:
-        template <typename PointInputIt>
-        SphereProjector(PointInputIt points_begin, PointInputIt points_end,
-            double max_width, double max_height, double padding)
-            : padding_(padding) //
-        {
-            if (points_begin == points_end) {
-                return;
-            }
+			const auto [left_it, right_it] = std::minmax_element(
+				points_begin, points_end,
+				[](auto lhs, auto rhs) { return lhs.lng < rhs.lng; });
+			min_lon_ = left_it->lng;
+			const double max_lon = right_it->lng;
 
-            const auto [left_it, right_it] = std::minmax_element(
-                points_begin, points_end,
-                [](auto lhs, auto rhs) { return lhs.lng < rhs.lng; });
-            min_lon_ = left_it->lng;
-            const double max_lon = right_it->lng;
+			const auto [bottom_it, top_it] = std::minmax_element(
+				points_begin, points_end,
+				[](auto lhs, auto rhs) { return lhs.lat < rhs.lat; });
+			const double min_lat = bottom_it->lat;
+			max_lat_ = top_it->lat;
 
-            const auto [bottom_it, top_it] = std::minmax_element(
-                points_begin, points_end,
-                [](auto lhs, auto rhs) { return lhs.lat < rhs.lat; });
-            const double min_lat = bottom_it->lat;
-            max_lat_ = top_it->lat;
+			std::optional<double> width_zoom;
+			if (!IsZero(max_lon - min_lon_)) 
+			{
+				width_zoom = (max_width - 2 * padding) / (max_lon - min_lon_);
+			}
 
-            std::optional<double> width_zoom;
-            if (!IsZero(max_lon - min_lon_)) {
-                width_zoom = (max_width - 2 * padding) / (max_lon - min_lon_);
-            }
+			std::optional<double> height_zoom;
+			if (!IsZero(max_lat_ - min_lat)) 
+			{
+				height_zoom = (max_height - 2 * padding) / (max_lat_ - min_lat);
+			}
 
-            std::optional<double> height_zoom;
-            if (!IsZero(max_lat_ - min_lat)) {
-                height_zoom = (max_height - 2 * padding) / (max_lat_ - min_lat);
-            }
+			if (width_zoom && height_zoom) 
+			{
+				zoom_coeff_ = std::min(*width_zoom, *height_zoom);
+			}
+			else if (width_zoom)
+			{
+				zoom_coeff_ = *width_zoom;
+			}
+			else if (height_zoom)
+			{
+				zoom_coeff_ = *height_zoom;
+			}
+		}
 
-            if (width_zoom && height_zoom) {
-                zoom_coeff_ = std::min(*width_zoom, *height_zoom);
-            }
-            else if (width_zoom) {
-                zoom_coeff_ = *width_zoom;
-            }
-            else if (height_zoom) {
-                zoom_coeff_ = *height_zoom;
-            }
-        }
+		svg::Point operator()(geo::Coordinates coords) const;
 
-        svg::Point operator()(geo::Coordinates coords) const;
-
-    private:
-        double padding_;
-        double min_lon_ = 0;
-        double max_lat_ = 0;
-        double zoom_coeff_ = 0;
-    };
+	private:
+		double padding_;
+		double min_lon_ = 0;
+		double max_lat_ = 0;
+		double zoom_coeff_ = 0;
+	};
 }

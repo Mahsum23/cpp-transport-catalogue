@@ -27,8 +27,10 @@ int main()
 	//std::cout.rdbuf(out.rdbuf());
 	JsonReader reader;
 	MapRenderer renderer;
+	
 	reader.ParseRequest(std::cin, renderer);
 	TransportCatalogue tc(&reader);
-	cout << ProcessInfoAsJson(tc, reader, renderer);
+	RequestHandler request_handler(tc, reader, renderer);
+	cout << request_handler.ProcessInfoAsJson();
 
 }

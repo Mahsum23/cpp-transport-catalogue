@@ -168,6 +168,37 @@ namespace transport_catalogue
 
 		}
 
+		std::set<BusView, BusViewComp> TransportCatalogue::GetBusesRenderInfo() const
+		{
+			std::set<BusView, BusViewComp> res;
+			for (const auto& bus : buses_)
+			{
+				BusView bus_render_info;
+				bus_render_info.name_ = bus.bus_name;
+				bus_render_info.is_roundtrip = bus.is_roundtrip;
+				for (auto& stop : bus.stops)
+				{
+					bus_render_info.stops_.emplace_back(stop->name, stop->coordinates);
+				}
+				res.insert(std::move(bus_render_info));
+			}
+			return res;
+		}
+
+		std::vector<StopView> TransportCatalogue::GetUniqueStopsInBus() const
+		{
+			std::vector<StopView> res;
+			res.reserve(stops_.size());
+			for (const auto& [key, value] : stops_to_buses_)
+			{
+				if (!value.empty())
+				{
+					res.emplace_back(std::string_view(key->name), key->coordinates);
+				}
+			}
+			return res;
+		}
+
 		json::Node TransportCatalogue::BusInfoAsJson(const BusInfo& bus_info, int id) const
 		{
 			using namespace json;

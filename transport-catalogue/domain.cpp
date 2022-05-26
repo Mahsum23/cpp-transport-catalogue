@@ -24,12 +24,25 @@ namespace transport_catalogue
 
 	}
 
-    svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
-        return {
-            (coords.lng - min_lon_) * zoom_coeff_ + padding_,
-            (max_lat_ - coords.lat) * zoom_coeff_ + padding_
-        };
-    }
+	StopView::StopView(std::string_view stop_name, geo::Coordinates coor)
+		: name_(stop_name), coor_(coor)
+	{
+
+	}
+
+	bool BusViewComp::operator()(const BusView& lhs, const BusView& rhs) const
+	{
+		return lhs.name_ < rhs.name_;
+	}
+
+	svg::Point SphereProjector::operator()(geo::Coordinates coords) const 
+	{
+		return 
+		{
+			(coords.lng - min_lon_) * zoom_coeff_ + padding_,
+			(max_lat_ - coords.lat) * zoom_coeff_ + padding_
+		};
+	}
 
 }
 
