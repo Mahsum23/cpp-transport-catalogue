@@ -10,11 +10,11 @@ namespace transport_catalogue
         const int EARTH_RADIUS = 6371000;
         const double pi = 3.1415926535;
 
-        bool Coordinates::operator==(const Coordinates& other) const 
+        bool Coordinates::operator==(const Coordinates& other) const
         {
             return lat == other.lat && lng == other.lng;
         }
-        bool Coordinates::operator!=(const Coordinates& other) const 
+        bool Coordinates::operator!=(const Coordinates& other) const
         {
             return !(*this == other);
         }
@@ -26,10 +26,10 @@ namespace transport_catalogue
         }
 
 
-        double ComputeDistance(Coordinates from, Coordinates to) 
+        double ComputeDistance(Coordinates from, Coordinates to)
         {
             using namespace std;
-            if (from == to) 
+            if (from == to)
             {
                 return 0;
             }

@@ -17,7 +17,6 @@ namespace svg
     struct Rgb;
     using Color = std::variant<std::monostate, std::string, Rgb, Rgba>;
     inline const std::monostate NoneColor;
-    //inline const Color NoneColor = "none";
 }
 
 std::ostream& operator<<(std::ostream& out, const svg::Color& color);
@@ -30,7 +29,8 @@ std::ostream& operator<<(std::ostream& out, const svg::Rgb& color);
 
 std::ostream& operator<<(std::ostream& out, const svg::Rgba& color);
 
-namespace svg {
+namespace svg
+{
 
     struct Rgb
     {
@@ -59,8 +59,6 @@ namespace svg {
         double opacity = 1.0;
     };
 
-    //using Color = std::variant<std::monostate, std::string, Rgb, Rgba>;
-
     struct ColorPrinter
     {
         std::ostream& out;
@@ -70,13 +68,15 @@ namespace svg {
         void operator()(Rgba color) const;
     };
 
-    enum class StrokeLineCap {
+    enum class StrokeLineCap
+    {
         BUTT,
         ROUND,
         SQUARE,
     };
 
-    enum class StrokeLineJoin {
+    enum class StrokeLineJoin
+    {
         ARCS,
         BEVEL,
         MITER,
@@ -84,11 +84,13 @@ namespace svg {
         ROUND,
     };
 
-    struct Point {
+    struct Point
+    {
         Point() = default;
         Point(double x, double y)
             : x(x)
-            , y(y) {
+            , y(y)
+        {
         }
         double x = 0;
         double y = 0;
@@ -98,23 +100,29 @@ namespace svg {
      * Вспомогательная структура, хранящая контекст для вывода SVG-документа с отступами.
      * Хранит ссылку на поток вывода, текущее значение и шаг отступа при выводе элемента
      */
-    struct RenderContext {
+    struct RenderContext
+    {
         RenderContext(std::ostream& out)
-            : out(out) {
+            : out(out)
+        {
         }
 
         RenderContext(std::ostream& out, int indent_step, int indent = 0)
             : out(out)
             , indent_step(indent_step)
-            , indent(indent) {
+            , indent(indent)
+        {
         }
 
-        RenderContext Indented() const {
+        RenderContext Indented() const
+        {
             return { out, indent_step, indent + indent_step };
         }
 
-        void RenderIndent() const {
-            for (int i = 0; i < indent; ++i) {
+        void RenderIndent() const
+        {
+            for (int i = 0; i < indent; ++i)
+            {
                 out.put(' ');
             }
         }
@@ -129,7 +137,8 @@ namespace svg {
      * конкретных тегов SVG-документа
      * Реализует паттерн "Шаблонный метод" для вывода содержимого тега
      */
-    class Object {
+    class Object
+    {
     public:
         void Render(const RenderContext& context) const;
 
@@ -227,7 +236,6 @@ namespace svg {
         void Add(Obj obj)
         {
             AddPtr(std::make_unique<Obj>(obj));
-            //content_.emplace_back(std::make_unique<Obj>(std::move(obj)));
         }
     };
 
@@ -238,11 +246,9 @@ namespace svg {
         virtual ~Drawable() = default;
     };
 
-    /*
-     * Класс Circle моделирует элемент <circle> для отображения круга
-     * https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle
-     */
-    class Circle final : public Object, public PathProps<Circle> {
+
+    class Circle final : public Object, public PathProps<Circle>
+    {
     public:
         Circle& SetCenter(Point center);
         Circle& SetRadius(double radius);
@@ -254,11 +260,9 @@ namespace svg {
         double radius_ = 1.0;
     };
 
-    /*
-     * Класс Polyline моделирует элемент <polyline> для отображения ломаных линий
-     * https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polyline
-     */
-    class Polyline final : public Object, public PathProps<Polyline> {
+
+    class Polyline final : public Object, public PathProps<Polyline>
+    {
     public:
         // Добавляет очередную вершину к ломаной линии
         Polyline& AddPoint(Point point);
@@ -268,11 +272,9 @@ namespace svg {
         std::vector<Point> points_;
     };
 
-    /*
-     * Класс Text моделирует элемент <text> для отображения текста
-     * https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
-     */
-    class Text final : public Object, public PathProps<Text> {
+
+    class Text final : public Object, public PathProps<Text>
+    {
     public:
         // Задаёт координаты опорной точки (атрибуты x и y)
         Text& SetPosition(Point pos);
@@ -301,15 +303,9 @@ namespace svg {
         std::string data_ = "";
     };
 
-    class Document : public ObjectContainer {
+    class Document : public ObjectContainer
+    {
     public:
-        /*
-         Метод Add добавляет в svg-документ любой объект-наследник svg::Object.
-         Пример использования:
-         Document doc;
-         doc.Add(Circle().SetCenter({20, 30}).SetRadius(15));
-        */
-        // void Add(???);
 
         // Добавляет в svg-документ объект-наследник svg::Object
 
