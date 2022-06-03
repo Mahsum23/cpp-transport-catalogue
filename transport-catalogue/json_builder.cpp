@@ -53,7 +53,7 @@ namespace json
     {
         if (nodes_stack_.empty() || !nodes_stack_.back()->IsArray())
         {
-            throw std::logic_error("error ending array ");
+            throw std::logic_error("error ending array");
         }
         nodes_stack_.pop_back();
         return *this;

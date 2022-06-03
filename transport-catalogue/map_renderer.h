@@ -19,54 +19,18 @@ namespace transport_catalogue
         class MapRenderer
         {
         public:
-            void SetWidth(double width)
-            {
-                width_ = width;
-            }
-            void SetHeight(double height)
-            {
-                height_ = height;
-            }
-            void SetPadding(double padding)
-            {
-                padding_ = padding;
-            }
-            void SetLineWidth(double line_width)
-            {
-                line_width_ = line_width;
-            }
-            void SetStopRadius(double stop_radius)
-            {
-                stop_radius_ = stop_radius;
-            }
-            void SetBusLabelFontSize(int bus_label_font_size)
-            {
-                bus_label_font_size_ = bus_label_font_size;
-            }
-            void SetBusLabelOffset(svg::Point bus_label_offset)
-            {
-                bus_label_offset_ = bus_label_offset;
-            }
-            void SetStopLabelFontSize(int stop_label_font_size)
-            {
-                stop_label_font_size_ = stop_label_font_size;
-            }
-            void SetStopLabelOffset(svg::Point stop_label_offset)
-            {
-                stop_label_offset_ = stop_label_offset;
-            }
-            void SetUnderlayerColor(svg::Color underlayer_color)
-            {
-                underlayer_color_ = underlayer_color;
-            }
-            void SetUnderlayerWidth(double underlayer_width)
-            {
-                underlayer_width_ = underlayer_width;
-            }
-            void SetColorPalette(std::vector<svg::Color>&& color_palette)
-            {
-                color_palette_ = std::move(color_palette);
-            }
+            void SetWidth(double width);
+            void SetHeight(double height);
+            void SetPadding(double padding);
+            void SetLineWidth(double line_width);
+            void SetStopRadius(double stop_radius);
+            void SetBusLabelFontSize(int bus_label_font_size);
+            void SetBusLabelOffset(svg::Point bus_label_offset);
+            void SetStopLabelFontSize(int stop_label_font_size);
+            void SetStopLabelOffset(svg::Point stop_label_offset);
+            void SetUnderlayerColor(svg::Color underlayer_color);
+            void SetUnderlayerWidth(double underlayer_width);
+            void SetColorPalette(std::vector<svg::Color>&& color_palette);
 
             void RenderMap(const catalogue::TransportCatalogue& tc, std::ostream& out) const;
             void AddBusLines(svg::Document& doc, const std::set<BusView, BusViewComp>& buses, const SphereProjector& proj) const;

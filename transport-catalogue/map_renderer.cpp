@@ -8,6 +8,56 @@ namespace transport_catalogue
 
     namespace renderer
     {
+
+        void MapRenderer::SetWidth(double width)
+        {
+            width_ = width;
+        }
+        void MapRenderer::SetHeight(double height)
+        {
+            height_ = height;
+        }
+        void MapRenderer::SetPadding(double padding)
+        {
+            padding_ = padding;
+        }
+        void MapRenderer::SetLineWidth(double line_width)
+        {
+            line_width_ = line_width;
+        }
+        void MapRenderer::SetStopRadius(double stop_radius)
+        {
+            stop_radius_ = stop_radius;
+        }
+        void MapRenderer::SetBusLabelFontSize(int bus_label_font_size)
+        {
+            bus_label_font_size_ = bus_label_font_size;
+        }
+        void MapRenderer::SetBusLabelOffset(svg::Point bus_label_offset)
+        {
+            bus_label_offset_ = bus_label_offset;
+        }
+        void MapRenderer::SetStopLabelFontSize(int stop_label_font_size)
+        {
+            stop_label_font_size_ = stop_label_font_size;
+        }
+        void MapRenderer::SetStopLabelOffset(svg::Point stop_label_offset)
+        {
+            stop_label_offset_ = stop_label_offset;
+        }
+        void MapRenderer::SetUnderlayerColor(svg::Color underlayer_color)
+        {
+            underlayer_color_ = underlayer_color;
+        }
+        void MapRenderer::SetUnderlayerWidth(double underlayer_width)
+        {
+            underlayer_width_ = underlayer_width;
+        }
+        void MapRenderer::SetColorPalette(std::vector<svg::Color>&& color_palette)
+        {
+            color_palette_ = std::move(color_palette);
+        }
+
         void MapRenderer::AddBusLines(svg::Document& doc, const std::set<BusView, BusViewComp>& buses, const SphereProjector& proj) const
         {
             int palette_counter = 0;
