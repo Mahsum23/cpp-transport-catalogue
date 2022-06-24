@@ -29,6 +29,10 @@ namespace transport_catalogue
             {
                 node.push_back(catalogue_.BusInfoAsJson(catalogue_.GetBusInfo(query.name_), query.id_));
             }
+            else if (query.query_type_ == QueryType::ROUTE)
+            {
+                node.push_back(catalogue_.RouteInfoAsJson(catalogue_.GetRouteInfo(query.to_, query.from_), query.id_));
+            }
         }
         return node;
     }

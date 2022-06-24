@@ -5,7 +5,6 @@
 #include "transport_catalogue.h"
 #include "json_reader.h"
 
-
 namespace transport_catalogue
 {
     class RequestHandler

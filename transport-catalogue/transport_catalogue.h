@@ -14,7 +14,8 @@
 #include "geo.h"
 #include "json_reader.h"
 #include "domain.h"
-
+#include "graph.h"
+#include "router.h"
 
 namespace transport_catalogue
 {
@@ -61,14 +62,24 @@ namespace transport_catalogue
 
             void AddStop(StopQuery&& stop);
             void AddBus(BusQuery&& bus);
+
             BusInfo GetBusInfo(std::string_view bus_name) const;
             StopInfo GetStopInfo(std::string_view stop_name) const;
+            RouteInfo GetRouteInfo(std::string_view to, std::string_view from) const;
+
             json::Node StopInfoAsJson(const StopInfo& stop_info, int id) const;
             json::Node BusInfoAsJson(const BusInfo& bus_info, int id) const;
+            json::Node RouteInfoAsJson(const RouteInfo& route_info, int id) const;
+
             std::set<BusView, BusViewComp> GetBusesRenderInfo() const;
             std::vector<StopView> GetUniqueStopsInBus() const;
+            void SetBusWaitTime(int wait_time);
+            void SetBusVelocity(int velocity);
             
         private:
+            double GetDistance(const std::pair<const Stop*, const Stop*> stop_pair) const;
+            void AddWaitEdgeInfo(std::string_view stop_name, std::string_view bus_name, double wait_time);
+            void AddBusEdgeInfo(std::string_view bus_name, std::string_view from, std::string_view to, int span_count, double road_time);
 
             struct StopPairHasher
             {
@@ -85,6 +96,15 @@ namespace transport_catalogue
             std::unordered_map<std::string_view, Bus*> busname_to_bus_;
             std::unordered_map<Stop*, std::unordered_set<Bus*>> stops_to_buses_;
             std::unordered_map<std::pair<const Stop*, const Stop*>, double, StopPairHasher> distances_;
+
+            std::unordered_map<std::string_view, size_t> stopname_to_index_;
+            std::vector<EdgeInfo> edge_info_;
+
+            graph::DirectedWeightedGraph<double> graph_;
+            mutable std::optional<graph::Router<double>> router_;
+
+            double bus_wait_time_ = 0;
+            int bus_velocity_ = 0;
         };
 
     }

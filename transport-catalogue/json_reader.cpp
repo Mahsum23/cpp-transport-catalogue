@@ -29,9 +29,17 @@ namespace transport_catalogue
                 {
                     ParseRenderSettings(value, renderer);
                 }
+                else if (key == "routing_settings")
+                {
+                    ParseRouterSettings(value);
+                }
             }
         }
-
+        void JsonReader::ParseRouterSettings(const json::Node& node)
+        {
+            const auto& settings = node.AsDict();
+            router_settings_ = { settings.at("bus_wait_time").AsInt(), settings.at("bus_velocity").AsInt() };
+        }
         void JsonReader::ParseBaseRequest(const json::Node& node)
         {
             using namespace json;
@@ -61,24 +69,34 @@ namespace transport_catalogue
                 {
                     info_query.id_ = request.AsDict().at("id").AsInt();
                     info_query.query_type_ = QueryType::MAP;
+                    info_queries_.push_back(std::move(info_query));
                 }
                 else if (request.AsDict().at("type").AsString() == "Stop")
                 {
                     info_query.id_ = request.AsDict().at("id").AsInt();
                     info_query.name_ = request.AsDict().at("name").AsString();
                     info_query.query_type_ = QueryType::STOP;
+                    info_queries_.push_back(std::move(info_query));
                 }
                 else if (request.AsDict().at("type").AsString() == "Bus")
                 {
                     info_query.id_ = request.AsDict().at("id").AsInt();
                     info_query.name_ = request.AsDict().at("name").AsString();
                     info_query.query_type_ = QueryType::BUS;
+                    info_queries_.push_back(std::move(info_query));
+                }
+                else if (request.AsDict().at("type").AsString() == "Route")
+                {
+                    info_query.id_ = request.AsDict().at("id").AsInt();
+                    info_query.from_ = request.AsDict().at("from").AsString();
+                    info_query.to_ = request.AsDict().at("to").AsString();
+                    info_query.query_type_ = QueryType::ROUTE;
+                    info_queries_.push_back(std::move(info_query));
                 }
                 else
                 {
                     throw std::invalid_argument("Unknown query");
                 }
-                info_queries_.push_back(std::move(info_query));
             }
         }
 

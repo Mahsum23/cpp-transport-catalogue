@@ -6,6 +6,7 @@
 #include <vector>
 #include <set>
 #include <stdexcept>
+#include <memory>
 
 #include "json.h"
 #include "domain.h"
@@ -31,6 +32,7 @@ namespace transport_catalogue
             void ParseBaseRequest(const json::Node& node);
             void ParseStatRequest(const json::Node& node);
             void ParseRenderSettings(const json::Node& node, renderer::MapRenderer& renderer);
+            void ParseRouterSettings(const json::Node& node);
             const std::vector<InfoQuery>& GetInfoQueries() const;
             
 
@@ -40,6 +42,7 @@ namespace transport_catalogue
             std::vector<StopQuery> stop_queries_;
             std::vector<BusQuery> bus_queries_;
             std::vector<InfoQuery> info_queries_;
+            RouterSettings router_settings_;
             
         };
     }

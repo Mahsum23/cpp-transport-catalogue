@@ -19,7 +19,8 @@ namespace transport_catalogue
     {
         MAP,
         BUS,
-        STOP
+        STOP,
+        ROUTE
     };
 
     struct StopQuery
@@ -48,9 +49,12 @@ namespace transport_catalogue
         InfoQuery(int id, std::string&& name, QueryType query_type);
 
         int id_ = 0;
+        std::string from_;
+        std::string to_;
         std::string name_;
         QueryType query_type_;
     };
+
     struct BusInfo
     {
         int id = 0;
@@ -67,6 +71,22 @@ namespace transport_catalogue
         std::string_view name;
         bool is_found = false;
         std::set<std::string> buses;
+    };
+
+    struct RouteItem
+    {
+        std::string type;
+        std::string stop_name;
+        std::string bus_name;
+        int span_count = 0;
+        double time = 0;
+    };
+
+    struct RouteInfo
+    {
+        bool is_found = false;
+        double total_time;
+        std::vector<RouteItem> items;
     };
 
     struct StopView
@@ -88,13 +108,30 @@ namespace transport_catalogue
         bool operator()(const BusView& lhs, const BusView& rhs) const;
     };
 
+    struct RouterSettings
+    {
+        int wait_time = 0;
+        int velocity = 0;
+    };
+
     inline const double EPSILON = 1e-6;
-    inline bool IsZero(double value)
+    inline bool IsZero(double value) 
     {
         return std::abs(value) < EPSILON;
     }
 
-    class SphereProjector
+    struct EdgeInfo
+    {
+        bool is_road = false;
+        std::string_view bus_name = "";
+        std::string_view stop_name = "";
+        double time = 0;
+        std::string_view from = "";
+        std::string_view to = "";
+        int span_count = 0;
+    };
+
+    class SphereProjector 
     {
     public:
         template <typename PointInputIt>
@@ -102,7 +139,7 @@ namespace transport_catalogue
             double max_width, double max_height, double padding)
             : padding_(padding) //
         {
-            if (points_begin == points_end)
+            if (points_begin == points_end) 
             {
                 return;
             }
@@ -120,13 +157,13 @@ namespace transport_catalogue
             max_lat_ = top_it->lat;
 
             std::optional<double> width_zoom;
-            if (!IsZero(max_lon - min_lon_))
+            if (!IsZero(max_lon - min_lon_)) 
             {
                 width_zoom = (max_width - 2 * padding) / (max_lon - min_lon_);
             }
 
             std::optional<double> height_zoom;
-            if (!IsZero(max_lat_ - min_lat))
+            if (!IsZero(max_lat_ - min_lat)) 
             {
                 height_zoom = (max_height - 2 * padding) / (max_lat_ - min_lat);
             }
