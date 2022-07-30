@@ -8,6 +8,7 @@
 
 namespace transport_catalogue
 {
+    class Serializer;
     namespace catalogue
     {
         class TransportCatalogue;
@@ -18,6 +19,7 @@ namespace transport_catalogue
 
         class MapRenderer
         {
+            friend class transport_catalogue::Serializer;
         public:
             void SetWidth(double width);
             void SetHeight(double height);

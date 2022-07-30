@@ -17,6 +17,8 @@
 #include "graph.h"
 #include "router.h"
 
+
+
 namespace transport_catalogue
 {
     class RequestHandler;
@@ -34,7 +36,7 @@ namespace transport_catalogue
         class TransportCatalogue
         {
             friend class transport_catalogue::RequestHandler;
-            
+            friend class transport_catalogue::Serializer;
         public:
             
             struct Stop

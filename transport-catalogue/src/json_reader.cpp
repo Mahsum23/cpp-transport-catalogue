@@ -33,7 +33,16 @@ namespace transport_catalogue
                 {
                     ParseRouterSettings(value);
                 }
+                else if (key == "serialization_settings")
+                {
+                    ParseSerializationSettings(value);
+                }
             }
+        }
+        void JsonReader::ParseSerializationSettings(const json::Node& node)
+        {
+            const auto& settings = node.AsDict();
+            file_name = settings.at("file").AsString();
         }
         void JsonReader::ParseRouterSettings(const json::Node& node)
         {

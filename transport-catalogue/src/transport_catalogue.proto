@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package serialize;
+
+message Point
+{
+    double x = 1;
+    double y = 2;
+}
+
+message Rgb
+{
+    int32 red = 1;
+    int32 green = 2;
+    int32 blue = 3;
+}
+
+message Rgba
+{
+    int32 red = 1;
+    int32 green = 2;
+    int32 blue = 3;
+    double opacity = 4;
+}
+
+message Color
+{
+    string str_color = 1;
+    Rgb rgb_color = 2;
+    Rgba rgba_color = 3;
+}
+
+message Renderer
+{
+    double width = 1;
+	double height = 2;
+	double padding = 3;
+	double line_width = 4;
+	double stop_radius = 5;
+	int32 bus_label_font_size = 6;
+	Point bus_label_offset = 7;
+	int32 stop_label_font_size = 8;
+	Point stop_label_offset = 9;
+	Color underlayer_color = 10;
+	double underlayer_width = 11;
+	repeated Color color_palette = 12;
+}
+
+message Coordinates
+{
+    double lat = 1;
+    double lng = 2;
+}
+
+message Stop
+{
+    string name = 1;
+    Coordinates coordinates = 2;
+    repeated double distances_to_stops = 3;
+    repeated string stops = 4;
+}
+
+message Bus
+{
+    string name = 1;
+    bool is_roundtrip = 2;
+    uint64 number_of_uniq_stops = 3;
+    repeated uint64 stops = 4;
+}
+
+message Reader
+{
+	repeated Stop stops = 1;
+    repeated Bus buses = 2;
+	Renderer renderer = 3;
+	int32 bus_velocity = 4;
+    int32 wait_time = 5;
+}
+
+
+   

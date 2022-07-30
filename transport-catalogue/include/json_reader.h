@@ -16,6 +16,7 @@
 
 namespace transport_catalogue
 {
+    class Serializer;
     namespace catalogue
     {
         class TransportCatalogue;
@@ -28,12 +29,15 @@ namespace transport_catalogue
         {
         public:
             friend class catalogue::TransportCatalogue;
+            friend class transport_catalogue::Serializer;
             void ParseRequest(std::istream& in, renderer::MapRenderer& renderer);
             void ParseBaseRequest(const json::Node& node);
             void ParseStatRequest(const json::Node& node);
             void ParseRenderSettings(const json::Node& node, renderer::MapRenderer& renderer);
             void ParseRouterSettings(const json::Node& node);
+            void ParseSerializationSettings(const json::Node& node);
             const std::vector<InfoQuery>& GetInfoQueries() const;
+            std::string file_name;
             
 
         private:
@@ -43,6 +47,7 @@ namespace transport_catalogue
             std::vector<BusQuery> bus_queries_;
             std::vector<InfoQuery> info_queries_;
             RouterSettings router_settings_;
+            
             
         };
     }

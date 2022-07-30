@@ -25,6 +25,7 @@ namespace transport_catalogue
         {
             bus_name = std::move(other.bus_name);
             stops = std::move(other.stops);
+            number_of_uniq_stops = other.number_of_uniq_stops;
             is_roundtrip = other.is_roundtrip;
         }
 
@@ -46,7 +47,7 @@ namespace transport_catalogue
         {
             bus_velocity_ = reader->router_settings_.velocity;
             bus_wait_time_ = reader->router_settings_.wait_time;
-
+            
             for (StopQuery& stop : reader->stop_queries_)
             {
                 AddStop(std::move(stop));
